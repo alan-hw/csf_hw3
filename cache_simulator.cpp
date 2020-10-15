@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 #include "cache_simulator.h"
 cache_simulator::cache_simulator (int n_set_num, int n_block_per_set, int n_dword_per_block, 
@@ -92,14 +93,21 @@ int cache_simulator::is_hit(int idx, int tag)
 }
 
 
-std::vector<std::pair<char, int>> read_traces()
+std::vector<std::pair<char, int>> read_traces(char * trace_string)
 {
-    // read the traces from cin
+    // read the traces from trace_string
     // returns a vector of pairs of (load/save, address)
+    // load string as stringbuf
+    std::stringbuf buffer(trace_string);
+    // load stringbuf as input stream
+    std::istream trace_in(&buffer);
+
     std::vector<std::pair<char, int>> output_vec;
     std::pair<char, int> temp_pair; // used to store input temporarily
     int ignore; // ignore the third input in line
-    while (std::cin >> temp_pair.first >> temp_pair.second >> ignore) {
+
+    // actually reading values from the stream
+    while (trace_in >> temp_pair.first >> temp_pair.second >> ignore) {
         output_vec.push_back(temp_pair);
     }
     return output_vec;
