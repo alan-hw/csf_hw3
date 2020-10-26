@@ -271,3 +271,19 @@ int read_traces(std::vector<std::pair<char, unsigned>>& vec_buffer)
     }
     return 0;
 }
+
+//check if input args is a positive power of two
+int check_power_of_two(int num){
+  if(num <= 0){
+    return 0;
+  }
+  else{
+    while(num>0){
+      if(num%2 == 1){
+	return 0;
+      }
+      num/=2;
+    }
+    return 1;
+  }
+}

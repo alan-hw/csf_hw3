@@ -12,14 +12,22 @@
 int main(int argc, char** argv)
 {
     if (argc != 7) { // has to be 7 argc, otherwise error
-        return 1;
+      std::cout << "not enough args" << std::endl;
+      return 1;
     }
     std::vector<std::pair<char, unsigned>> traces;
     read_traces(traces); // read traces from cin
     // read in argv for contructing the simulator
     std::vector<unsigned> cache_arg; // {set_num, block_per_set, byte_per_block}
     for (int i = 1; i<4; i++) {
-        cache_arg.push_back(std::stoi(argv[i])); 
+      if(check_power_of_two(std::stoi(argv[i]))){
+	cache_arg.push_back(std::stoi(argv[i])); 
+      }
+      else{
+	std::cout << "first three args should be a positive power-of-2" << std::endl;
+	return 1;
+      }
+        
     }
     if (0==strcmp(argv[4], "write-allocate")) {
         cache_arg.push_back(1);

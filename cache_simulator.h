@@ -82,4 +82,6 @@ class cache_simulator {
 };
 
 int read_traces(std::vector<std::pair<char, unsigned>>& vec_buffer);
+int check_power_of_two(int num);
 #endif
+
