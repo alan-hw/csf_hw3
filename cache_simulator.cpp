@@ -278,12 +278,6 @@ int check_power_of_two(int num){
     return 0;
   }
   else{
-    while(num>0){
-      if(num%2 == 1){
-	return 0;
-      }
-      num/=2;
-    }
-    return 1;
+    return (num & (num - 1)) == 0;
   }
 }
