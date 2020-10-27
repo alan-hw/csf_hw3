@@ -61,13 +61,11 @@ int main(int argc, char** argv)
       std::cout << "invalid configuration" << std::endl;
       return 1;
     }
-    std::cout << cache_arg.size() << "\n";
     // intialise the simulator
-    // std::cout << cache_arg[0] << cache_arg[1] << cache_arg[2] << cache_arg[3] << cache_arg[4] << cache_arg[5] << "\n";
     cache_simulator simulator(cache_arg[0], cache_arg[1], cache_arg[2], cache_arg[3], cache_arg[4], cache_arg[5]);
-    std::cout << "set_num: " << simulator.get_set_num()<<"\n";
-    std::cout << "block_per_set: " << simulator.get_block_per_set() << "\n";
-    std::cout << "byte_per_block: " << simulator.get_byte_per_block() << " offset: " << simulator.get_ofst_bnum() <<" index bit: "<<simulator.get_idx_bnum() << "\n";
+    // std::cout << "set_num: " << simulator.get_set_num()<<"\n";
+    // std::cout << "block_per_set: " << simulator.get_block_per_set() << "\n";
+    // std::cout << "byte_per_block: " << simulator.get_byte_per_block() << " offset: " << simulator.get_ofst_bnum() <<" index bit: "<<simulator.get_idx_bnum() << "\n";
     // run the traces
     simulator.process_ops(traces);
     return 0;

@@ -204,18 +204,6 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
 	        }
             cur_set->blocks[output.first].content.second = 0;  // update counter
             cur_set->stat = output.first; // update previous tag of set
-        /*
-        //Hit others: increase some counters
-        else if(cur_set->blocks[output.first].content.second != 0){
-	        for (std::vector<block>::iterator it=cur_set->blocks.begin(); it!=cur_set->blocks.end(); ++it) {
-	            if(it->content.second<cur_set->blocks[output.first].content.second){
-	                ++it->content.second;
-	                it->content.second %= this->block_per_set; 
-	            }
-	        }
-	        cur_set->blocks[output.first].content.second = 0; 
-        }
-        */
     }
     //FIFO
     else {
@@ -331,7 +319,7 @@ void cache_simulator::print_metrics()
     int save_num = this->sim_metric.save_hm.first + this->sim_metric.save_hm.second;
 
     std::cout << "Total loads: " << load_num << "\n"
-    << "Toatal stores: " << save_num << "\n"
+    << "Total stores: " << save_num << "\n"
     << "Load hits: " << this->sim_metric.load_hm.first << "\n"
     << "Load misses: " << this->sim_metric.load_hm.second << "\n"
     << "Store hits: " << this->sim_metric.save_hm.first << "\n"
