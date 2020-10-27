@@ -67,8 +67,8 @@ class cache_simulator {
         metric sim_metric;
 
     public:
-    cache_simulator (unsigned int n_set_num, unsigned int n_block_per_set, unsigned int n_byte_per_block, 
-                    int n_evict_type, int is_write_back, int n_is_write_alloc);
+    cache_simulator(unsigned int n_set_num, unsigned int n_block_per_set, unsigned int n_byte_per_block, 
+                    int n_is_write_alloc, int is_write_back, int n_evict_type);
     
     void load_data (struct_addr addr);
     void save_data (struct_addr addr);

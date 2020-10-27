@@ -9,7 +9,7 @@
 
 #include "cache_simulator.h"
 cache_simulator::cache_simulator(unsigned int n_set_num, unsigned int n_block_per_set, unsigned int n_byte_per_block, 
-                    int n_evict_type, int is_write_back, int n_is_write_alloc) 
+                    int n_is_write_alloc, int is_write_back, int n_evict_type) 
     : is_write_alloc{n_is_write_alloc}, 
     write_bt{is_write_back}, 
     evict_type{n_evict_type}, 
@@ -73,22 +73,24 @@ void cache_simulator::save_data (struct_addr addr)
 {
     // PART 1: CHECK IF HIT, CALCULATE METRIC FOR PREPARING CACHE BLOCK
     std::pair<int, int> hit_stat = this->fetch_evict_block(addr, SAVE); // check if it is a hit, 0 for save
-    if (hit_stat.second != 1 && this->is_write_alloc == WRITE_ALLOC) {
+    if (hit_stat.second != 1) {
         // miss and write allocate -> if no_write_allocate, then no change to cache block
         ++this->sim_metric.save_hm.second; // update save miss
-        if (hit_stat.second == 0) {
-            // the block is not clean,
-            // the current content is first saved
-            // then the entire block is loaded, so write/load twice
-	        this->sim_metric.tot_cycle += (this->byte_per_block * 50); 
-            this->sim_metric.mem_op_num.first += (this->byte_per_block >> 1); // total byte / 4 * 2
-        } else {
-            // the block is clean.
-            // the current content is not saved
-            this->sim_metric.tot_cycle += this->byte_per_block * 25; // the current cache content is saved, then entire block is loaded
-            this->sim_metric.mem_op_num.first += (this->byte_per_block >> 2); // total byte / 4
+        if (this->is_write_alloc == WRITE_ALLOC) {
+            if (hit_stat.second == 0) {
+                // the block is not clean,
+                // the current content is first saved
+                // then the entire block is loaded, so write/load twice
+                this->sim_metric.tot_cycle += (this->byte_per_block * 50); 
+                this->sim_metric.mem_op_num.first += (this->byte_per_block >> 1); // total byte / 4 * 2
+            } else {
+                // the block is clean.
+                // the current content is not saved
+                this->sim_metric.tot_cycle += this->byte_per_block * 25; // the current cache content is saved, then entire block is loaded
+                this->sim_metric.mem_op_num.first += (this->byte_per_block >> 2); // total byte / 4
+            }
         }
-    } else if (hit_stat.second == 1) {
+    } else {
         // hit, write_allocate doesn't matter
         ++this->sim_metric.save_hm.first; // update save hit
     }
@@ -98,6 +100,9 @@ void cache_simulator::save_data (struct_addr addr)
         // no_write_allocate, directly load from memory -> can be integrated to part 1
         this->sim_metric.tot_cycle += 100; // 4 byte saved to memory
         ++this->sim_metric.mem_op_num.first; // 1 operation, 4 bytes saved
+        if (hit_stat.second == 1) {
+            ++this->sim_metric.tot_cycle; // if it is a hit, then still update the load
+        }
 
     } else {
         ++this->sim_metric.cac_op_num.second; // inc cache operation count
@@ -164,6 +169,10 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     }
     //output.second = 1 "hit", 0 "dirty miss", -1 "clean miss"
 
+    if(output.second!=1 && this->is_write_alloc==NO_WRITE_ALLOC && op_type==SAVE) {
+        return output; // if no_write_allocate, op_type is save, and is a miss, then no change to cache at all
+    }
+
     // we only need dirty bit when write back
     if(this->write_bt==WRITE_BACK){      
         // if a block is load miss, mark it clean
@@ -180,9 +189,6 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     if (output.second != 1 && !(op_type == SAVE && this->is_write_alloc == NO_WRITE_ALLOC)) {
         // if a miss and is save and is write allocate
         cur_set->blocks[output.first].content.first = addr.tag; 
-    }
-    if(output.second!=1 && this->is_write_alloc==NO_WRITE_ALLOC && op_type==SAVE) {
-        return output; // if no_write_allocate, op_type is save, and is a miss, then no change to cache at all
     }
     //update timestamp
     //LRU
