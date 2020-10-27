@@ -134,7 +134,8 @@ struct_addr cache_simulator::get_struct_addr(unsigned raw_addr)
 std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_type)
 {
     std::vector<set>::iterator cur_set = this->sets.begin();
-    advance(cur_set, addr.index);
+    advance(cur_set, addr.index); // get the current set
+
     std::pair<int, int> output(0, 0);
     std::vector<block>::iterator targ_it = std::find_if(cur_set->blocks.begin(), cur_set->blocks.end(), [&] (const block &o) {
       return o.content.first == addr.tag;
@@ -207,7 +208,7 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     }
     //FIFO
     else {
-        // there should be conditioning to make sure only newly loaded data should lead to increment (i.e. a miss)
+        // A miss occured, update output
         if (output.second != 1) {
             for (std::vector<block>::iterator it=cur_set->blocks.begin(); it!=cur_set->blocks.end(); ++it) {
 	            ++it->content.second;
@@ -219,74 +220,13 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     return output;
 }
   
-    // /* Fetch the block */
-    // set cur_set = this->sets[addr.index]; // fetch current indx
-    // std::pair<int, int> output(0, 0); // output pair <index_of_block, hit_status>
-    // // hit_status: 1=hit, 0=miss, -1=miss but empty
-    
-    // // Try find any tag matching block
-    // std::vector<block>::iterator targ_it = std::find_if(cur_set->blocks.begin(), cur_set->blocks.end(), [&] (const block &o) {
-    //     return o.content.first == addr.tag; // block tag equals to desired tag.
-    // });
-    // // If not found, find any empty block
-    // if (targ_it != cur_set->blocks.end()) {
-    //     output.second = 1; // hit
-    // } else {
-    //     targ_it = std::find_if(cur_set->blocks.begin(), cur_set->blocks.end(), [&] (const block &o) {
-    //         return o.content.first == -1; // block is empty
-    //     });
-    //     output.second = -1; // empty miss
-    // }
-    // // If still not found, find minimum counter
-    // if (targ_it == cur_set->blocks.end()) {
-    //     targ_it = std::min_element(cur_set->blocks.begin(), cur_set->blocks.end(), [] (const block &a, const block &b) {
-    //         return a.content.second < b.content.second; // fist block counter smaller than second?
-    //     });
-    //     output.second = 0; // filled miss
-    // }
-    // // convert iterator to index, update hit_status
-    // output.first = targ_it - cur_set->blocks.begin();
-
-    // /* Evict/Update the block */
-    // // If (!(miss && save && no_write_alloc))) -> update (else no change)
-    // if (!(output.second != 1 && op_type == 0 && this->is_write_alloc == 0)) {
-    //     cur_set->blocks[output.first].content.first = addr.tag; // update tag
-    //     cur_set->stat = addr.tag; // update 
-    //     // if (!(LRU && (cur_tag == prev_tag))):
-    //     if (!(this->evict_type==0 && (addr.tag==cur_set->stat))) {
-    //         if (!(this->evict_type==1 && output.second<1)) {
-    //             // if (not (miss && FIFO)) -> 
-    //             // increment all counters (if FIFO, mod the counters w/ block_num)
-    //             for (std::vector<block>::iterator it=cur_set->blocks.begin(); 
-    //                 it!=cur_set->blocks.end(); ++it) {
-    //                     ++it->content.second;
-    //                     if(this->evict_type == 1) {
-    //                         // For FIFO, mod the result
-    //                         it->content.second %= this->block_per_set;
-    //                     }
-    //                 }
-    //         }
-            
-    //         if (this->evict_type==0) {
-    //             // if LRU reset the counter for new hit LRU
-    //             cur_set->blocks[output.first].content.second=0; 
-    //         }
-    //     } 
-        
-    // }
-    // return output;
-//}
-
 void cache_simulator::process_ops(std::vector<std::pair<char, unsigned>>& ops)
 {
     struct_addr cur_addr;
-    // process the operators
+    // process the operations
     for(unsigned i=0; i < ops.size(); ++i) {
-        // for each operator
-      
+        // for each 
         cur_addr = this->get_struct_addr(ops[i].second);
-	//std::cout<<"index: "<< cur_addr.index <<"tag: "<< cur_addr.tag <<std::endl;
-	//this->print_metrics();
         if(ops[i].first == 's') {
             this->save_data(cur_addr); // save
         } else {
