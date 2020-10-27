@@ -30,10 +30,10 @@ int main(int argc, char** argv)
         
     }
     if (0==strcmp(argv[4], "write-allocate")) {
-        cache_arg.push_back(1);
+        cache_arg.push_back(WRITE_ALLOC);
     }
     else if(0==strcmp(argv[4], "no-write-allocate")){
-	cache_arg.push_back(0);
+	cache_arg.push_back(NO_WRITE_ALLOC);
     }
     else{
       std::cout << "invalid configuration" << std::endl;
@@ -41,10 +41,10 @@ int main(int argc, char** argv)
     }
     
     if (0==strcmp(argv[5], "write-back")) {
-        cache_arg.push_back(1);
+        cache_arg.push_back(WRITE_BACK);
     }
     else if(0==strcmp(argv[5], "write-through")){
-	cache_arg.push_back(0);
+	cache_arg.push_back(WRITE_THRU);
     }
     else{
       std::cout << "invalid configuration" << std::endl;
@@ -52,10 +52,10 @@ int main(int argc, char** argv)
     }
     
     if (0==strcmp(argv[6], "lru")) {
-        cache_arg.push_back(1);
+        cache_arg.push_back(LRU);
     }
     else if(0==strcmp(argv[6], "fifo")){
-	cache_arg.push_back(0);
+	cache_arg.push_back(FIFO);
     }
     else{
       std::cout << "invalid configuration" << std::endl;

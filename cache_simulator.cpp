@@ -42,7 +42,7 @@ cache_simulator::cache_simulator(unsigned int n_set_num, unsigned int n_block_pe
 void cache_simulator::load_data (struct_addr addr)
 {
     // PART 1: CHECK IF HIT, CALCULATE METRIC FOR PREPARING CACHE BLOCK
-    std::pair<int, int> hit_stat = this->fetch_evict_block(addr, 0); // check if it is a hit, 0 for load
+    std::pair<int, int> hit_stat = this->fetch_evict_block(addr, LOAD); // check if it is a hit, 1 for load
     if (hit_stat.second != 1) {
         // a miss
         ++this->sim_metric.load_hm.second; // update load miss
@@ -72,8 +72,8 @@ void cache_simulator::load_data (struct_addr addr)
 void cache_simulator::save_data (struct_addr addr)
 {
     // PART 1: CHECK IF HIT, CALCULATE METRIC FOR PREPARING CACHE BLOCK
-    std::pair<int, int> hit_stat = this->fetch_evict_block(addr, 1); // check if it is a hit, 1 for save
-    if (hit_stat.second != 1 && this->is_write_alloc == NO_WRITE_ALLOC) {
+    std::pair<int, int> hit_stat = this->fetch_evict_block(addr, SAVE); // check if it is a hit, 0 for save
+    if (hit_stat.second != 1 && this->is_write_alloc == WRITE_ALLOC) {
         // miss and write allocate -> if no_write_allocate, then no change to cache block
         ++this->sim_metric.save_hm.second; // update save miss
         if (hit_stat.second == 0) {
@@ -167,11 +167,11 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     // we only need dirty bit when write back
     if(this->write_bt==1){      
         // if a block is load miss, mark it clean
-        if(op_type==0 && output.second!=1){
+        if(op_type==LOAD && output.second!=1){
     	    cur_set.blocks[output.first].is_dirty = 0;
         }
     // if a write occurs, make it dirty
-        if(op_type==1){ // TODO figure out if there is op_type confusion
+        if(op_type==SAVE){ // TODO figure out if there is op_type confusion
 	        cur_set.blocks[output.first].is_dirty = 1;
         }
     }
