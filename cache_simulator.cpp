@@ -79,7 +79,7 @@ void cache_simulator::save_data (struct_addr addr)
             // the block is not clean,
             // the current content is first saved
             // then the entire block is loaded, so write/load twice
-            this->sim_metric.tot_cycle += (this->byte_per_block * 25 << 2); 
+	  this->sim_metric.tot_cycle += ((this->byte_per_block * 25) << 1); 
             this->sim_metric.mem_op_num.first += (this->byte_per_block >> 1); // total byte / 4 * 2
         } else {
             // the block is clean.
@@ -194,8 +194,8 @@ void cache_simulator::process_ops(std::vector<std::pair<char, unsigned>>& ops)
         // for each operator
       
         cur_addr = this->get_struct_addr(ops[i].second);
-	std::cout<<"index: "<< cur_addr.index <<"tag: "<< cur_addr.tag <<std::endl;
-	this->print_metrics();
+	//std::cout<<"index: "<< cur_addr.index <<"tag: "<< cur_addr.tag <<std::endl;
+	//this->print_metrics();
         if(ops[i].first == 's') {
             this->save_data(cur_addr); // save
         } else {
