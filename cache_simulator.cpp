@@ -19,6 +19,7 @@ cache_simulator::cache_simulator(unsigned int n_set_num, unsigned int n_block_pe
     idx_bnum{0}, 
     ofst_bnum{0}
 {
+  this->sim_metric.tot_cycle = 0;
     while (n_set_num >>= 1) ++idx_bnum; // integer log2(), set_num and ofst_bnum assumed != 0
     while (n_byte_per_block >>= 1) ++ofst_bnum; // integer log2()
     // INITIALISE DATA with empty values, signified by -1 at for block tags
@@ -191,12 +192,16 @@ void cache_simulator::process_ops(std::vector<std::pair<char, unsigned>>& ops)
     // process the operators
     for(unsigned i=0; i < ops.size(); ++i) {
         // for each operator
+      
         cur_addr = this->get_struct_addr(ops[i].second);
+	std::cout<<"index: "<< cur_addr.index <<"tag: "<< cur_addr.tag <<std::endl;
+	this->print_metrics();
         if(ops[i].first == 's') {
             this->save_data(cur_addr); // save
         } else {
             this -> load_data(cur_addr); // load
         }
+	
     }
     this->print_metrics();
 }
