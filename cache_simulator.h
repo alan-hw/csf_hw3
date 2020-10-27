@@ -33,6 +33,7 @@ struct block {
     // TODO: properly select the block type to account for various valid bit/address/etc
     public:
         std::pair<long, unsigned> content;
+        int is_dirty;
 };
 
 struct set {
