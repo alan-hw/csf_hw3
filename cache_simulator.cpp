@@ -154,11 +154,13 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     
     // convert iterator to index, update hit_status
     output.first = targ_it - cur_set.blocks.begin();
-    if(cur_set.blocks[output.first].is_dirty){
-      output.second = 0;
-    }
-    else{
-      output.second = -1;
+    if (output.second != 1) {
+       if(cur_set.blocks[output.first].is_dirty){
+	 output.second = 0;
+       }
+       else{
+	 output.second = -1;
+       }
     }
     //output.second = 1 "hit", 0 "dirty miss", -1 "clean miss"
 
