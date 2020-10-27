@@ -133,7 +133,7 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
   std::pair<int, int> output(0, 0);
   std::vector<block>::iterator targ_it = std::find_if(cur_set.blocks.begin(), cur_set.blocks.end(), [&] (const block &o) {
       return o.content.first == addr.tag;
-     });
+    });
     if (targ_it != cur_set.blocks.end()) {
       output.second = 1; // hit
     }
@@ -154,7 +154,7 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     
     // convert iterator to index, update hit_status
     output.first = targ_it - cur_set.blocks.begin();
-    if(cur_set[output.first].is_dirty){
+    if(cur_set.blocks[output.first].is_dirty){
       output.second = 0;
     }
     else{
@@ -164,18 +164,18 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
 
     // if a block is load miss, mark it clean
     if(op_type==0 && output.second!=1){
-      cur_set[output.first].is_dirty = 0;
+     cur_set.blocks[output.first].is_dirty = 0;
     }
     // if a write occurs, make it dirty
 
     if(op_type==1){
-      cur_set[output.first].is_dirty = 1;
+      cur_set.blocks[output.first].is_dirty = 1;
     }
 
     //update the block tag
     if (!(output.second != 1 && op_type == 0 && this->is_write_alloc == 0)) {
         this->sets[addr.index].blocks[output.first].content.first = addr.tag; 
-    
+    }
     //update timestamp
     //LRU
     if(this->evict_type==1){
@@ -208,7 +208,7 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     }
 
     return output;
-
+}
   
     // /* Fetch the block */
     // set cur_set = this->sets[addr.index]; // fetch current indx
@@ -266,7 +266,7 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
         
     // }
     // return output;
-}
+//}
 
 void cache_simulator::process_ops(std::vector<std::pair<char, unsigned>>& ops)
 {
