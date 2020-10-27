@@ -164,14 +164,18 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     }
     //output.second = 1 "hit", 0 "dirty miss", -1 "clean miss"
 
+    // we only need dirty bit when write back
+    if(this->write_bt==1){
+      
     // if a block is load miss, mark it clean
-    if(op_type==0 && output.second!=1){
-     cur_set.blocks[output.first].is_dirty = 0;
-    }
+      if(op_type==0 && output.second!=1){
+	cur_set.blocks[output.first].is_dirty = 0;
+      }
     // if a write occurs, make it dirty
 
-    if(op_type==1){
-      cur_set.blocks[output.first].is_dirty = 1;
+      if(op_type==1){
+	cur_set.blocks[output.first].is_dirty = 1;
+      }
     }
 
     //update the block tag
