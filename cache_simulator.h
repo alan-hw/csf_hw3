@@ -10,6 +10,15 @@
 #include <math.h>
 
 #define ADDR_LEN 32 // 32 bit system
+#define SAVE 0
+#define LOAD 1
+#define LRU 1
+#define FIFO 0
+#define WRITE_ALLOC 1
+#define NO_WRITE_ALLOC 0
+#define WRITE_BACK 1
+#define WRITE_THRU 0
+
 
 struct struct_addr {
     public:

@@ -25,16 +25,16 @@ cache_simulator::cache_simulator(unsigned int n_set_num, unsigned int n_block_pe
     // INITIALISE DATA with empty values, signified by -1 at for block tags
     block empty_block;
     empty_block.content = std::make_pair((long)-1, (int)0); // fill the empty block, -1 is for empty
+    empty_block.is_dirty = 0; // initialise to 0
     set empty_set;
     empty_set.blocks.assign(this->block_per_set, empty_block); // fill set with empty block
     empty_set.stat=-1; // initialise the to prevent initial 0 being treated as a real stat.
     this->sets.assign(this->set_num, empty_set); // fill simulator with empty sets
 
-    // For FIFO, the counters should be initialisd from block_per_set to 0, descending order
+    // The counters should be initialisd from block_per_set to 0, descending order
     for (unsigned i=0; i <set_num; ++i) {
         for (unsigned j=0; j<block_per_set; ++j) {
             this->sets[i].blocks[j].content.second = block_per_set-i-1; // so first block has block_per_set-1, last has 0
-	    this->sets[i].blocks[j].is_dirty = 0;
         }
     }
 }
@@ -73,14 +73,14 @@ void cache_simulator::save_data (struct_addr addr)
 {
     // PART 1: CHECK IF HIT, CALCULATE METRIC FOR PREPARING CACHE BLOCK
     std::pair<int, int> hit_stat = this->fetch_evict_block(addr, 1); // check if it is a hit, 1 for save
-    if (hit_stat.second != 1 && this->is_write_alloc == 1) {
+    if (hit_stat.second != 1 && this->is_write_alloc == NO_WRITE_ALLOC) {
         // miss and write allocate -> if no_write_allocate, then no change to cache block
         ++this->sim_metric.save_hm.second; // update save miss
         if (hit_stat.second == 0) {
             // the block is not clean,
             // the current content is first saved
             // then the entire block is loaded, so write/load twice
-	  this->sim_metric.tot_cycle += ((this->byte_per_block * 25) << 1); 
+	        this->sim_metric.tot_cycle += ((this->byte_per_block * 25) << 1); 
             this->sim_metric.mem_op_num.first += (this->byte_per_block >> 1); // total byte / 4 * 2
         } else {
             // the block is clean.
@@ -129,26 +129,26 @@ struct_addr cache_simulator::get_struct_addr(unsigned raw_addr)
 
 std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_type)
 {
-  set cur_set = this->sets[addr.index];
-  std::pair<int, int> output(0, 0);
-  std::vector<block>::iterator targ_it = std::find_if(cur_set.blocks.begin(), cur_set.blocks.end(), [&] (const block &o) {
+    set cur_set = this->sets[addr.index];
+    std::pair<int, int> output(0, 0);
+    std::vector<block>::iterator targ_it = std::find_if(cur_set.blocks.begin(), cur_set.blocks.end(), [&] (const block &o) {
       return o.content.first == addr.tag;
     });
     if (targ_it != cur_set.blocks.end()) {
-      output.second = 1; // hit
+        output.second = 1; // hit
     }
     else{
-      //locate a cache block to use
-      //step 1 find if there is any empty
-      targ_it = std::find_if(cur_set.blocks.begin(), cur_set.blocks.end(), [&] (const block &o) {
-	  return o.content.first == -1; 
+        //locate a cache block to use
+        //step 1 find if there is any empty block
+        targ_it = std::find_if(cur_set.blocks.begin(), cur_set.blocks.end(), [&] (const block &o) {
+	    return o.content.first == -1; 
 	});
-      //step 2 if there is no empty, find one to evict
-      //we should evict maximum of timestamps
-      if (targ_it == cur_set.blocks.end()) {
-	targ_it = std::max_element(cur_set.blocks.begin(), cur_set.blocks.end(), [] (const block &a, const block &b) {
+        //step 2 if there is no empty, find one to evict
+        //we should evict maximum of timestamps
+        if (targ_it == cur_set.blocks.end()) {
+	        targ_it = std::max_element(cur_set.blocks.begin(), cur_set.blocks.end(), [] (const block &a, const block &b) {
             return a.content.second < b.content.second;
-	  });
+	        });
       }
     }
     
@@ -156,61 +156,71 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     output.first = targ_it - cur_set.blocks.begin();
     if (output.second != 1) {
        if(cur_set.blocks[output.first].is_dirty){
-	 output.second = 0;
+	    output.second = 0; // a miss, to evict an filled block
        }
        else{
-	 output.second = -1;
+	    output.second = -1; // a miss, to write an empty block
        }
     }
     //output.second = 1 "hit", 0 "dirty miss", -1 "clean miss"
 
     // we only need dirty bit when write back
-    if(this->write_bt==1){
-      
-    // if a block is load miss, mark it clean
-      if(op_type==0 && output.second!=1){
-	cur_set.blocks[output.first].is_dirty = 0;
-      }
+    if(this->write_bt==1){      
+        // if a block is load miss, mark it clean
+        if(op_type==0 && output.second!=1){
+    	    cur_set.blocks[output.first].is_dirty = 0;
+        }
     // if a write occurs, make it dirty
-
-      if(op_type==1){
-	cur_set.blocks[output.first].is_dirty = 1;
-      }
+        if(op_type==1){ // TODO figure out if there is op_type confusion
+	        cur_set.blocks[output.first].is_dirty = 1;
+        }
     }
 
-    //update the block tag
-    if (!(output.second != 1 && op_type == 0 && this->is_write_alloc == 0)) {
+    //update the block tag if is a miss
+    if (output.second != 1 && !(op_type == SAVE && this->is_write_alloc == NO_WRITE_ALLOC)) {
+        // if a miss and is save and is write allocate
         this->sets[addr.index].blocks[output.first].content.first = addr.tag; 
+    }
+    if(output.second!=1 && this->is_write_alloc==NO_WRITE_ALLOC && op_type==SAVE) {
+        return output; // if no_write_allocate, op_type is save, and is a miss, then no change to cache at all
     }
     //update timestamp
     //LRU
-    if(this->evict_type==1){
-      //miss: set to 0 and increase other counters
-      //or Hit least recently used: set to 0 and increase other counters
-      if(output.second != 1 || cur_set.blocks[output.first].content.second == (this->block_per_set-1)){
-	for (std::vector<block>::iterator it=this->sets[addr.index].blocks.begin(); it!=this->sets[addr.index].blocks.end(); ++it) {
-	  ++it->content.second;
-	  it->content.second %= this->block_per_set;   
-	}
-        cur_set.blocks[output.first].content.second = 0; 
-      }
-      //Hit others: increase some counters
-      else if(cur_set.blocks[output.first].content.second != 0){
-	for (std::vector<block>::iterator it=this->sets[addr.index].blocks.begin(); it!=this->sets[addr.index].blocks.end(); ++it) {
-	  if(it->content.second<cur_set.blocks[output.first].content.second){
-	    ++it->content.second;
-	    it->content.second %= this->block_per_set; 
-	  }
-	}
-	cur_set.blocks[output.first].content.second = 0; 
-      }
+    if(this->evict_type==LRU){
+        //miss: set to 0 and increase other counters
+        //or Hit least recently used: set to 0 and increase other counters
+        // if(output.second != 1 || cur_set.blocks[output.first].content.second == (this->block_per_set-1)){
+        if(!(output.first == cur_set.stat)) { // if not current hit index == last hit index, then increase
+	        for (std::vector<block>::iterator it=this->sets[addr.index].blocks.begin(); it!=this->sets[addr.index].blocks.end(); ++it) {
+                // if the current block counter is less then the evict block counter, increment
+                // if(it->content.second<cur_set.blocks[output.first].content.second){
+	                ++it->content.second;
+	            // it->content.second %= this->block_per_set;   
+                // }
+	    }
+            this->sets[addr.index].blocks[output.first].content.second = 0;  // update counter
+            this->sets[addr.index].stat = output.first; // update previous tag of set
+        }
+        /*
+        //Hit others: increase some counters
+        else if(cur_set.blocks[output.first].content.second != 0){
+	        for (std::vector<block>::iterator it=this->sets[addr.index].blocks.begin(); it!=this->sets[addr.index].blocks.end(); ++it) {
+	            if(it->content.second<cur_set.blocks[output.first].content.second){
+	                ++it->content.second;
+	                it->content.second %= this->block_per_set; 
+	            }
+	        }
+	        cur_set.blocks[output.first].content.second = 0; 
+        }
+        */
     }
     //FIFO
     else{
+        // there should be conditioning to make sure only newly loaded data should lead to increment (i.e. a miss)
       	for (std::vector<block>::iterator it=this->sets[addr.index].blocks.begin(); it!=this->sets[addr.index].blocks.end(); ++it) {
-	  ++it->content.second;
-	  it->content.second %= this->block_per_set;   
-	}
+	        ++it->content.second;
+	        it->content.second %= this->block_per_set;   
+	    }
     }
 
     return output;
