@@ -2,8 +2,8 @@ CC = g++
 CFLAGS = -std=c++11 -Wextra -Wall -pedantic
 DBGFLAGS = -g
 
-cache_simulator: cache_main.o cache_simulator.o
-	$(CC) $(CFLAGS) $(DBGFLAGS) cache_simulator.o cache_main.o -o cache_simulator 
+csim: cache_main.o cache_simulator.o
+	$(CC) $(CFLAGS) $(DBGFLAGS) cache_simulator.o cache_main.o -o csim 
 
 cache_main.o: cache_main.cpp
 	$(CC) $(CFLAGS) $(DBGFLAGS) -c cache_main.cpp -o cache_main.o 

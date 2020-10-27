@@ -31,20 +31,43 @@ int main(int argc, char** argv)
     }
     if (0==strcmp(argv[4], "write-allocate")) {
         cache_arg.push_back(1);
-    } else {cache_arg.push_back(0);}
+    }
+    else if(0==strcmp(argv[4], "no-write-allocate")){
+	cache_arg.push_back(0);
+    }
+    else{
+      std::cout << "invalid configuration" << std::endl;
+      return 1;
+    }
+    
     if (0==strcmp(argv[5], "write-back")) {
         cache_arg.push_back(1);
-    } else {cache_arg.push_back(0);}
+    }
+    else if(0==strcmp(argv[5], "write-through")){
+	cache_arg.push_back(0);
+    }
+    else{
+      std::cout << "invalid configuration" << std::endl;
+      return 1;
+    }
+    
     if (0==strcmp(argv[6], "lru")) {
         cache_arg.push_back(1);
-    } else {cache_arg.push_back(0);}
+    }
+    else if(0==strcmp(argv[6], "fifo")){
+	cache_arg.push_back(0);
+    }
+    else{
+      std::cout << "invalid configuration" << std::endl;
+      return 1;
+    }
     std::cout << cache_arg.size() << "\n";
     // intialise the simulator
     // std::cout << cache_arg[0] << cache_arg[1] << cache_arg[2] << cache_arg[3] << cache_arg[4] << cache_arg[5] << "\n";
     cache_simulator simulator(cache_arg[0], cache_arg[1], cache_arg[2], cache_arg[3], cache_arg[4], cache_arg[5]);
-    std::cout << "set_num: " << simulator.get_set_num() << " offset: " << simulator.get_idx_bnum() << "\n";
+    std::cout << "set_num: " << simulator.get_set_num()<<"\n";
     std::cout << "block_per_set: " << simulator.get_block_per_set() << "\n";
-    std::cout << "byte_per_block: " << simulator.get_byte_per_block() << " offset: " << simulator.get_ofst_bnum() << "\n";
+    std::cout << "byte_per_block: " << simulator.get_byte_per_block() << " offset: " << simulator.get_ofst_bnum() <<" index bit: "<<simulator.get_idx_bnum() << "\n";
     // run the traces
     simulator.process_ops(traces);
     return 0;
