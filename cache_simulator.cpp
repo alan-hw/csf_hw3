@@ -80,7 +80,7 @@ void cache_simulator::save_data (struct_addr addr)
             // the block is not clean,
             // the current content is first saved
             // then the entire block is loaded, so write/load twice
-	        this->sim_metric.tot_cycle += ((this->byte_per_block * 25) << 1); 
+	        this->sim_metric.tot_cycle += this->byte_per_block * 50; 
             this->sim_metric.mem_op_num.first += (this->byte_per_block >> 1); // total byte / 4 * 2
         } else {
             // the block is clean.
@@ -95,15 +95,15 @@ void cache_simulator::save_data (struct_addr addr)
     }
 
     // PART 2: ACTUALLY LOAD DATA FROM CACHE TO CPU
-    if (this->is_write_alloc==0) {
+    if (this->is_write_alloc==NO_WRITE_ALLOC) {
         // no_write_allocate, directly load from memory -> can be integrated to part 1
         this->sim_metric.tot_cycle += 100; // 4 byte saved to memory
         ++this->sim_metric.mem_op_num.first; // 1 operation, 4 bytes saved
 
     } else {
         ++this->sim_metric.cac_op_num.second; // inc cache operation count
-        ++this->sim_metric.tot_cycle; // inc cycle count by 1, required for loading
-        if (this->write_bt==0) {
+        ++this->sim_metric.tot_cycle; // inc cycle count by 1, required for loading from cache
+        if (this->write_bt==WRITE_THRU) {
             // if write through, there is addition need to save memory
             this->sim_metric.tot_cycle += 100; // 4 byte saved to memory
             ++this->sim_metric.mem_op_num.first; // increment memory operation
@@ -155,17 +155,17 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
     // convert iterator to index, update hit_status
     output.first = targ_it - cur_set.blocks.begin();
     if (output.second != 1) {
-       if(cur_set.blocks[output.first].is_dirty){
-	    output.second = 0; // a miss, to evict an filled block
+       if(cur_set.blocks[output.first].is_dirty==1){
+	    output.second = 0; // a miss, to evict an direty block
        }
        else{
-	    output.second = -1; // a miss, to write an empty block
+	    output.second = -1; // a miss, to write an clean block
        }
     }
     //output.second = 1 "hit", 0 "dirty miss", -1 "clean miss"
 
     // we only need dirty bit when write back
-    if(this->write_bt==1){      
+    if(this->write_bt==WRITE_BACK){      
         // if a block is load miss, mark it clean
         if(op_type==LOAD && output.second!=1){
     	    cur_set.blocks[output.first].is_dirty = 0;
@@ -197,7 +197,7 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
 	                ++it->content.second;
 	            // it->content.second %= this->block_per_set;   
                 // }
-	    }
+	        }
             this->sets[addr.index].blocks[output.first].content.second = 0;  // update counter
             this->sets[addr.index].stat = output.first; // update previous tag of set
         }
