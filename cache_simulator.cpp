@@ -100,7 +100,7 @@ void cache_simulator::save_data (struct_addr addr)
         // no_write_allocate, directly load from memory -> can be integrated to part 1
         this->sim_metric.tot_cycle += 100; // 4 byte saved to memory
         ++this->sim_metric.mem_op_num.first; // 1 operation, 4 bytes saved
-        if (hit_stat.second == 1) {
+        if (hit_stat.second == 1 && this->write_bt == WRITE_THRU) {
             ++this->sim_metric.tot_cycle; // if it is a hit, then still update the load
         }
 
