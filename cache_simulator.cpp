@@ -34,7 +34,7 @@ cache_simulator::cache_simulator(unsigned int n_set_num, unsigned int n_block_pe
     // The counters should be initialisd from block_per_set to 0, descending order
     for (unsigned i=0; i <set_num; ++i) {
         for (unsigned j=0; j<block_per_set; ++j) {
-            this->sets[i].blocks[j].content.second = block_per_set-i-1; // so first block has block_per_set-1, last has 0
+            this->sets[i].blocks[j].content.second = block_per_set-j-1; // so first block has block_per_set-1, last has 0
         }
     }
 }
@@ -50,7 +50,7 @@ void cache_simulator::load_data (struct_addr addr)
             // the block is not clean,
             // the current content is first saved
             // then the entire block is loaded, so write/load twice
-            this->sim_metric.tot_cycle += ((this->byte_per_block * 25) << 1); 
+            this->sim_metric.tot_cycle += (this->byte_per_block * 50); 
             this->sim_metric.mem_op_num.second += (this->byte_per_block >> 1); // total byte / 4 * 2
         } else {
             // the block is clean.
@@ -80,12 +80,11 @@ void cache_simulator::save_data (struct_addr addr)
             // the block is not clean,
             // the current content is first saved
             // then the entire block is loaded, so write/load twice
-	        this->sim_metric.tot_cycle += this->byte_per_block * 50; 
+	        this->sim_metric.tot_cycle += (this->byte_per_block * 50); 
             this->sim_metric.mem_op_num.first += (this->byte_per_block >> 1); // total byte / 4 * 2
         } else {
             // the block is clean.
-            // the current content is first saved
-            // then the entire block is loaded
+            // the current content is not saved
             this->sim_metric.tot_cycle += this->byte_per_block * 25; // the current cache content is saved, then entire block is loaded
             this->sim_metric.mem_op_num.first += (this->byte_per_block >> 2); // total byte / 4
         }
@@ -190,17 +189,17 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
         //miss: set to 0 and increase other counters
         //or Hit least recently used: set to 0 and increase other counters
         // if(output.second != 1 || cur_set.blocks[output.first].content.second == (this->block_per_set-1)){
-        if(!(output.first == cur_set.stat)) { // if not current hit index == last hit index, then increase
+        // if(!(output.first == cur_set.stat)) { // if not current hit index == last hit index, then increase
 	        for (std::vector<block>::iterator it=this->sets[addr.index].blocks.begin(); it!=this->sets[addr.index].blocks.end(); ++it) {
                 // if the current block counter is less then the evict block counter, increment
-                // if(it->content.second<cur_set.blocks[output.first].content.second){
+                if(it->content.second<cur_set.blocks[output.first].content.second){
 	                ++it->content.second;
 	            // it->content.second %= this->block_per_set;   
-                // }
+                }
 	        }
             this->sets[addr.index].blocks[output.first].content.second = 0;  // update counter
             this->sets[addr.index].stat = output.first; // update previous tag of set
-        }
+        // }
         /*
         //Hit others: increase some counters
         else if(cur_set.blocks[output.first].content.second != 0){
@@ -215,14 +214,16 @@ std::pair<int, int> cache_simulator::fetch_evict_block(struct_addr addr, int op_
         */
     }
     //FIFO
-    else{
+    else {
         // there should be conditioning to make sure only newly loaded data should lead to increment (i.e. a miss)
-      	for (std::vector<block>::iterator it=this->sets[addr.index].blocks.begin(); it!=this->sets[addr.index].blocks.end(); ++it) {
-	        ++it->content.second;
-	        it->content.second %= this->block_per_set;   
-	    }
+        if (output.second != 1) {
+            for (std::vector<block>::iterator it=this->sets[addr.index].blocks.begin(); it!=this->sets[addr.index].blocks.end(); ++it) {
+	            ++it->content.second;
+	            it->content.second %= this->block_per_set;   
+	        }
+            this->sets[addr.index].blocks[output.first].content.second = 0;  // update counter
+        }
     }
-
     return output;
 }
   
