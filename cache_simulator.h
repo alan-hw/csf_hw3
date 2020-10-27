@@ -79,6 +79,7 @@ class cache_simulator {
     // given a set index and tag, returns true if it is a hit.
     int is_hit(struct_addr);
     void process_ops(std::vector<std::pair<char, unsigned>>& ops);
+    void flush_cache();
     void print_metrics(); // print the metrics
     void print_cache(); // print the cache content for debug
     
