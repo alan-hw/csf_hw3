@@ -20,46 +20,48 @@ int main(int argc, char** argv)
     // read in argv for contructing the simulator
     std::vector<unsigned> cache_arg; // {set_num, block_per_set, byte_per_block}
     for (int i = 1; i<4; i++) {
-      if(check_power_of_two(std::stoi(argv[i]))){
-	cache_arg.push_back(std::stoi(argv[i])); 
-      }
-      else{
-	std::cout << "first three args should be a positive power-of-2" << std::endl;
-	return 1;
-      }
+        if(check_power_of_two(std::stoi(argv[i]))){
+	        cache_arg.push_back(std::stoi(argv[i])); 
+        } else{
+	        std::cout << "first three args should be a positive power-of-2" << std::endl;
+	        return 1;
+        }
         
     }
     if (0==strcmp(argv[4], "write-allocate")) {
         cache_arg.push_back(WRITE_ALLOC);
-    }
-    else if(0==strcmp(argv[4], "no-write-allocate")){
-	cache_arg.push_back(NO_WRITE_ALLOC);
-    }
-    else{
-      std::cout << "invalid configuration" << std::endl;
-      return 1;
+    } else if(0==strcmp(argv[4], "no-write-allocate")){
+	    cache_arg.push_back(NO_WRITE_ALLOC);
+    } else{
+        std::cout << "invalid configuration" << std::endl;
+        return 1;
     }
     
     if (0==strcmp(argv[5], "write-back")) {
         cache_arg.push_back(WRITE_BACK);
-    }
-    else if(0==strcmp(argv[5], "write-through")){
-	cache_arg.push_back(WRITE_THRU);
-    }
-    else{
-      std::cout << "invalid configuration" << std::endl;
-      return 1;
+    } else if(0==strcmp(argv[5], "write-through")){
+	    cache_arg.push_back(WRITE_THRU);
+    } else{
+        std::cout << "invalid configuration" << std::endl;
+        return 1;
     }
     
     if (0==strcmp(argv[6], "lru")) {
         cache_arg.push_back(LRU);
+    } else if(0==strcmp(argv[6], "fifo")){
+	    cache_arg.push_back(FIFO);
+    } else{
+        std::cout << "invalid configuration" << std::endl;
+        return 1;
     }
-    else if(0==strcmp(argv[6], "fifo")){
-	cache_arg.push_back(FIFO);
+    if(std::stoi(argv[3]) < 4){
+        std::cout << "number of bytes in each block should be at least 4" << std::endl;
+        return 1;
     }
-    else{
-      std::cout << "invalid configuration" << std::endl;
-      return 1;
+    
+    if(cache_arg[4]==WRITE_BACK && cache_arg[3]==NO_WRITE_ALLOC){
+        std::cout << "invalid configuration" << std::endl;
+        return 1;
     }
     // intialise the simulator
     cache_simulator simulator(cache_arg[0], cache_arg[1], cache_arg[2], cache_arg[3], cache_arg[4], cache_arg[5]);

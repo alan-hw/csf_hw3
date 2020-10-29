@@ -318,8 +318,7 @@ int read_traces(std::vector<std::pair<char, unsigned>>& vec_buffer)
     
     // actually reading values from the stream
     while ((std::cin >> temp_pair.first >> std::hex >> temp_pair.second >> ignore)) {
-        vec_buffer.push_back(temp_pair);
-        // std::cout << "type " << output_vec[i].first << " addr " << std::hex << output_vec[i].second << "\n";
+        vec_buffer.push_back(temp_pair); // push back input
     }
     return 0;
 }

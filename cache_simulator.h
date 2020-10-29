@@ -27,8 +27,6 @@ struct struct_addr {
         unsigned tag; 
 };
 
-// or a map will just suffice
-// TODO fininish the metric "skeleton"
 struct metric {
     public:
         std::pair<int, int> cac_op_num;  // save, load
@@ -84,6 +82,7 @@ class cache_simulator {
     void print_cache(); // print the cache content for debug
     
     void restart_cache();
+    // get/sets for debugging tec
     metric get_metrics();
     unsigned get_set_num();
     unsigned get_block_per_set();
