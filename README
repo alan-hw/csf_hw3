@@ -1,0 +1,4 @@
+We consider there are three factors for every cache configurations. The first factor is either "direct-mapped", "m-way set-associative", and "fully associative". The second factor is either "write-allocate and write back", "write-allocate and write-through" or "no-write-allocate and write-through". The third factor is either "LRU" or "fifo". Therefore, we have 3x3x2 = 18 types of cache configuration.   
+
+For this experiment, we set "direct-mapped" as 256 sets of 1 block, "m-way set-associative" as 64 sets of 4 block and "fully associative" as 1 set of 256 block. 
+
