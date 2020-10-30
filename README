@@ -1,9 +1,27 @@
-We consider there are three factors for every cache configurations. The first factor is either "direct-mapped", "m-way set-associative", and "fully associative". The second factor is either "write-allocate and write back", "write-allocate and write-through" or "no-write-allocate and write-through". The third factor is either "LRU" or "fifo". Therefore, we have 3x3x2 = 18 types of cache configuration.   
+/*
+Yuntao Li
+yli346@jh.edu
 
-For this experiment, we set "direct-mapped" as 256 sets of 1 block, "m-way set-associative" as 64 sets of 4 block and "fully associative" as 1 set of 256 block. We choose this setting to ensure a constant total memory size for each cache.
-configuration.
+Fangjie Li
+fli35@jh.edu
+*/
+We consider there are three factors for every cache configurations. The first 
+factor is either "direct-mapped", "m-way set-associative", and "fully 
+associative". The second factor is either "write-allocate and write back", 
+"write-allocate and write-through" or "no-write-allocate and write-through". 
+The third factor is either "LRU" or "fifo". Therefore, we have 3x3x2 = 18 types
+of cache configuration.   
 
-We ran all combinations of these factors mentioned above on both gcc.trace and swim.trace and attached the raw data below. We selected these two files because gcc.trace and swim.trace are traces from real programs. Therefore we could have a fairly accurate estimation about how these configurations will work in real programming.
+For this experiment, we set "direct-mapped" as 256 sets of 1 block, "m-way set-
+associative" as 64 sets of 4 block and "fully associative" as 1 set of 256 
+block. We choose this setting to ensure a constant total memory size for each 
+cache configuration.
+
+We ran all combinations of these factors mentioned above on both gcc.trace and 
+swim.trace and attached the raw data below. We selected these two files 
+because gcc.trace and swim.trace are traces from real programs. Therefore we 
+could have a fairly accurate estimation about how these configurations will 
+work in real programming.
 
 # Choice of Metrics
 The goal of this investigation is to determine the "best" cache configuration.
@@ -70,7 +88,7 @@ to increasing miss penalty.
 Contribution:
 Fangjie Li
 1. construct the overall data and class structure for the simulator
-2. implemented save/load methods, trace input functions, and helped with implementing the evict strategies.
+2. implemented save/load methods, trace input functions, and implemented the evict strategies as a group.
 3. debugged the entire programme together as a group.
 4. ran LRU of the tests for the best cache analysis
 Yuntao Li

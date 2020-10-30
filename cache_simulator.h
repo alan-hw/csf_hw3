@@ -1,3 +1,10 @@
+/*
+Yuntao Li
+yli346@jh.edu
+
+Fangjie Li
+fli35@jh.edu
+*/
 #ifndef CACHE_SIMULATOR_H
 #define CACHE_SIMULATOR_H
 
